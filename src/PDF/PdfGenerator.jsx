@@ -1,9 +1,9 @@
 import React from "react";
 import { jsPDF } from 'jspdf';
 import './PdfGenerator.css';
+import constructImage from './construct.png'; // Update the path accordingly
 
 function PdfGenerator() {
-
     const jspdf = new jsPDF('p', 'pt', 'letter');
 
     const handleSubmit = (e) => {
@@ -18,13 +18,14 @@ function PdfGenerator() {
             autoPaging: 'text',
         };
 
-        // Extract content of h1 element and replace line breaks with spaces
+        // Use the imported image directly
+        const image = new Image();
+        image.src = constructImage;
+
         const h1Content = document.querySelector('h1').innerText.replace(/\n/g, ' ');
 
-        // Use the content of h1 with desired formatting
-        const formattedContent = `<div style="font-family: 'Times New Roman'; font-style: italic; font-size: 16px;">${h1Content}</div><br/>${val}`;
+        const formattedContent = `<div style="font-family: 'Times New Roman'; font-style: italic; font-size: 16px;">${h1Content}</div><br/>${val}<br/><img src="${image.src}" />`;
 
-        // Use the formatted content for the PDF
         jspdf.html(formattedContent, data);
     }
 
