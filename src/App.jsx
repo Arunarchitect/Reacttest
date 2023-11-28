@@ -1,35 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import  React,{useEffect, useState } from 'react'
+import PdfTemplate from './PDF/Template'
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [InvoiceNumber, setInvoiceNumber] = useState('');
+
+  const [Dates, setDates] = useState('');
+
+  const [view, setView] = useState(true);
+
+  let newDate = new Date()
+  let date = newDate.getDate();
+
+  const numbers = [
+    {
+      product: 'dsdsd',
+      amount: '23782'
+    },
+    {
+      product: 'dsd',
+      amount: '993'
+    },
+    {
+      product: 'dssdffedfdsd',
+      amount: '623'
+    }
+  ]
+
+  useEffect(() => {
+
+    const current = new Date();
+    const date = `${current.getDate()}/${current.getMonth() + 1}/${current.getFullYear()}`;
+    console.log(`Date is ${date}`);
+    setDates(date)
+
+},[])
+
+  const Create = () => {
+    setView(false)
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {
+        view ?
+          <div className='containers' >
+            <div className="form">
+              <div className="inputs">
+                <input type="text" placeholder='Invoice Number' value={InvoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+              </div>
+              <div className="buttons">
+                <button onClick={Create} >Create ➡️ </button>
+              </div>
+            </div>
+          </div>
+          :
+          <PdfTemplate InvoiceNumber={InvoiceNumber} date={Dates}  />
+      }
     </>
-  )
+  );
 }
 
-export default App
+
+export default App;
