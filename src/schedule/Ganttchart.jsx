@@ -124,6 +124,29 @@ const Ganttchart = () => {
         }
     }
 
+    //plugin weekend
+    const weekend = {
+      id: 'weekend',
+      beforeDatasetsDraw(chart, args, pluginOptions){
+        const {ctx, data, chartArea:{top, bottom, left , right, width, height}, scales:{x,y}} = chart;
+        
+        ctx.save();
+        x.ticks.forEach((tick,index) => {
+          const day = new Date(tick.value).getDay();
+          console.log(day)
+          if (day === 6 || day === 0){
+            ctx.fillStyle = pluginOptions.weekendColor;
+            ctx.fillRect(
+              x.getPixelForValue(tick.value),
+              top,
+              x.getPixelForValue(new Date(tick.value).setHours(24))-x.getPixelForValue(tick.value),
+              height);
+          }
+        })
+        
+      }
+    }
+
 
     // config
     const config = {
@@ -153,6 +176,9 @@ const Ganttchart = () => {
           }
         },
         plugins:{
+            weekend: {
+              weekendColor: 'rgba(102,102,102,0.2)'
+            },
             legend : {
                 display:false,
             },
@@ -185,7 +211,7 @@ const Ganttchart = () => {
             }
         }
       },
-      plugins: [todayLine, assignedTasks, status]
+      plugins: [todayLine, assignedTasks, status, weekend]
     };
 
     
