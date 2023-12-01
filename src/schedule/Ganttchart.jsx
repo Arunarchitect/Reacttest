@@ -15,12 +15,12 @@ const Ganttchart = () => {
       datasets: [{
         label: 'Weekly Sales',
         data: [
-            {x: ['2023-11-30','2023-12-06'], y:'Task 1', name:'Arun', status:"Done"},
-            {x: ['2023-12-06','2023-12-12'], y:'Task 2', name:'Anumol', status:"Done"},
-            {x: ['2023-12-09','2023-12-12'], y:'Task 3', name:'Dalia', status:"Delayed"},
-            {x: ['2023-12-12','2023-12-15'], y:'Task 4', name:'John', status:"Done"},
-            {x: ['2023-12-15','2023-12-17'], y:'Task 5', name:'George', status:"Pending"},
-            {x: ['2023-12-17','2023-12-19'], y:'Task 6', name:'Arun', status:"Done"}
+            {x: ['2023-11-30','2023-12-06'], y:'Task 1', name:'Arun', status: 2},
+            {x: ['2023-12-06','2023-12-12'], y:'Task 2', name:'Anumol', status: 1},
+            {x: ['2023-12-09','2023-12-12'], y:'Task 3', name:'Dalia', status: 0},
+            {x: ['2023-12-12','2023-12-15'], y:'Task 4', name:'John', status: 2},
+            {x: ['2023-12-15','2023-12-17'], y:'Task 5', name:'George', status: 1},
+            {x: ['2023-12-17','2023-12-19'], y:'Task 6', name:'Arun', status: 2}
         ],
         backgroundColor: [
           'rgba(255, 26, 104, 0.2)',
@@ -71,13 +71,24 @@ const Ganttchart = () => {
         id: 'status',
         afterDatasetsDraw(chart, args, pluginOptions){
             const {ctx, data, chartArea:{top, bottom, left , right}, scales:{x,y}} = chart;
+            const icons = ['\uf00d','\uf110','\uf00c'];
+            const colors = ['green',
+                            'yellow',
+                            'red',]
+            const angle = Math.PI /180;
             ctx.save()
-            ctx.font = 'bolder 12px sans-serif';
-            ctx.fillStyle = 'black';
+            ctx.font = 'bolder 12px FontAwesome';
+            
             ctx.textBaseLine = 'middle';
             ctx.textAlign = 'center';
             data.datasets[0].data.forEach((datapoint, index) => {
-                ctx.fillText(datapoint.status, right + 50, y.getPixelForValue(index));
+                ctx.beginPath();
+                ctx.fillStyle = colors[datapoint.status];
+                ctx.arc(right + 50,y.getPixelForValue(index), 20, 0,angle*360, false);
+                ctx.closePath()
+                ctx.fill()
+                ctx.fillStyle = 'black';
+                ctx.fillText(icons[datapoint.status], right + 50, y.getPixelForValue(index));
             })
             ctx.restore()
         }
