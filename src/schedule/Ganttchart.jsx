@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import './styles/Chart.css'
 import 'chartjs-adapter-date-fns';
@@ -6,21 +6,22 @@ import 'chartjs-adapter-date-fns';
 
 const Ganttchart = () => {
   const chartRef = useRef(null);
+  // const [labelsArrayFilter, setLabelsArrayFilter] = useState([]);
+
 
   useEffect(() => {
     // setup
     const colors = ['red','yellow','green']
     const data = {
-    //   labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      // labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       datasets: [{
         label: 'Weekly Sales',
         data: [
             {x: ['2023-11-28','2023-11-30'], y:'Task 1', name:'Arun', status: 2},
             {x: ['2023-11-30','2023-12-09'], y:'Task 2', name:'Anumol', status: 1},
             {x: ['2023-12-09','2023-12-12'], y:'Task 3', name:'Dalia', status: 0},
-            {x: ['2023-12-12','2023-12-15'], y:'Task 4', name:'John', status: 2},
-            {x: ['2023-12-15','2023-12-17'], y:'Task 5', name:'George', status: 1},
-            {x: ['2023-12-17','2023-12-19'], y:'Task 6', name:'Arun', status: 2}
+            {x: ['2023-12-09','2023-12-12'], y:'Task 4', name:'John', status: 1},
+            {x: ['2023-12-17','2023-12-22'], y:'Task 5', name:'George', status: 1}
         ],
         backgroundColor: (ctx) => {
           return colors[ctx.raw.status]
@@ -35,6 +36,19 @@ const Ganttchart = () => {
         barPercentage : 0.2,
       }]
     };
+
+    const labelsArray = data.datasets[0].data.map((datapoint, index) =>{
+      return datapoint.y;
+    })
+    const labelsArrayFilter = [...new Set(labelsArray)];
+
+
+    // const labelsArray = data.datasets[0].data.map((datapoint, index) =>{
+    //   return datapoint.y;
+    // })
+    // setLabelsArrayFilter([...new Set(labelsArray)]);
+
+
 
 
 
@@ -89,13 +103,17 @@ const Ganttchart = () => {
             ctx.textBaseLine = 'middle';
             ctx.textAlign = 'center';
             data.datasets[0].data.forEach((datapoint, index) => {
-                ctx.beginPath();
-                ctx.fillStyle = colors[datapoint.status];
-                ctx.arc(right + (paddingRight/2),y.getPixelForValue(index), 12, 0,angle*360, false);
-                ctx.closePath()
-                ctx.fill()
-                ctx.fillStyle = 'black';
-                ctx.fillText(icons[datapoint.status], right + (paddingRight/2), y.getPixelForValue(index));
+
+                if (y.getPixelForValue(index) > top && y.getPixelForValue(index)<bottom) {
+                  ctx.beginPath();
+                  ctx.fillStyle = colors[datapoint.status];
+                  ctx.arc(right + (paddingRight/2),y.getPixelForValue(index), 12, 0,angle*360, false);
+                  ctx.closePath()
+                  ctx.fill()
+                  ctx.fillStyle = 'black';
+                  ctx.fillText(icons[datapoint.status], right + (paddingRight/2), y.getPixelForValue(index));
+                }
+                
             })
             ctx.font = 'bolder 12px sans-serif';
             ctx.fillStyle = 'black';
@@ -116,7 +134,10 @@ const Ganttchart = () => {
             ctx.textBaseLine = 'middle';
             ctx.textAlign = 'left';
             data.datasets[0].data.forEach((datapoint, index) => {
+              if (x.getPixelForValue(new Date()) >= left && x.getPixelForValue(new Date()) <= right){
                 ctx.fillText(datapoint.name, 10, y.getPixelForValue(index));
+              }
+                
             })
             ctx.fillText('Persons', 10 ,top-15);
             ctx.restore()
@@ -133,7 +154,7 @@ const Ganttchart = () => {
         ctx.save();
         x.ticks.forEach((tick,index) => {
           const day = new Date(tick.value).getDay();
-          console.log(day)
+          // console.log(day)
           if (day === 6 || day === 0){
             ctx.fillStyle = pluginOptions.weekendColor;
             ctx.fillRect(
@@ -173,6 +194,11 @@ const Ganttchart = () => {
             },
             min: '2023-11-27',
             max: '2023-12-22'
+          },
+          y: {
+            min: 0,
+            max: 4,
+            labels: labelsArrayFilter
           }
         },
         plugins:{
@@ -233,6 +259,7 @@ const Ganttchart = () => {
     // Instantly assign Chart.js version
     document.getElementById('chartVersion').innerText = Chart.version;
     addNames();
+    // addTasks();
     
   }, []); // empty dependency array ensures useEffect runs only once
 
@@ -287,7 +314,35 @@ const Ganttchart = () => {
       option.value = memberName;
       names.appendChild(option);
     })
+  }
+
+  // function addTasks(){
+  //   const tasks = document.getElementById('taskName');
+  //   while (tasks.firstElementChild){
+  //     tasks.removeChild(tasks.firstElementChild)
+  //   }
+  //   // const namesArray = chartRef.current.data.datasets[0].data.map((datapoint) => {
+  //   //   return datapoint.name;
+      
+  //   // })
+  //   // const namesArrayFilter = [...new Set(namesArray)]
+  //   labelsArrayFilter.forEach((taskName) => {
+  //     const option = document.createElement('option');
+  //     option.value = taskName;
+  //     names.appendChild(option);
+  //   })
     
+  // }
+  
+
+
+  function showTask(){
+    const yScale = chartRef.current.config.options.scales.y;
+    const minTask = document.getElementById('minTask').value;
+    const maxTask = document.getElementById('maxTask').value;
+    yScale.min = yScale.labels[minTask];
+    yScale.max = yScale.labels[maxTask];
+    chartRef.current.update();
   }
 
 
@@ -303,7 +358,10 @@ const Ganttchart = () => {
           <br />
           <hr />
           <br />
-          <input type="text" id='taskName' />
+          <input type="text" id='taskName' list='tasks'/>
+          <datalist id='tasks'>
+            
+          </datalist>
           <input type="date" id='startDateTask' />
           <input type="date" id='endDateTask' />
           <input type="text" id='teamMember' list='names' />
@@ -316,6 +374,20 @@ const Ganttchart = () => {
             <option value="2">Completed</option>
           </select>
           <button onClick={addTask}>AddTask</button>
+          <br />
+          <hr />
+          <br />
+          <select id="minTask" onChange={showTask} defaultValue="0">
+            <option value="0">Task 1</option>
+            <option value="1">Task 2</option>
+          </select>
+
+          <select id="maxTask" onChange={showTask} defaultValue="4">
+            <option value="3">Task 4</option>
+            <option value="4">Task 5</option>
+          </select>
+
+
         </div>
       </div>
     </div>
