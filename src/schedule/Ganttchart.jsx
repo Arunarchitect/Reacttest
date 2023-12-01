@@ -188,11 +188,15 @@ const Ganttchart = () => {
       plugins: [todayLine, assignedTasks, status]
     };
 
+    
+
 
     // destroy existing chart instance
     if (chartRef.current) {
       chartRef.current.destroy();
     }
+
+    
 
 
     // render init block
@@ -202,6 +206,8 @@ const Ganttchart = () => {
 
     // Instantly assign Chart.js version
     document.getElementById('chartVersion').innerText = Chart.version;
+    addNames();
+    
   }, []); // empty dependency array ensures useEffect runs only once
 
   function chartFilter(event) {
@@ -213,11 +219,12 @@ const Ganttchart = () => {
     }
     const startDate = `${year}-${month}-01`
     const endDate = `${year}-${month}-${lastDay(year, month)}`
-    console.log(endDate)
+    // console.log(endDate)
 
     chartRef.current.config.options.scales.x.min = startDate;
     chartRef.current.config.options.scales.x.max = endDate;
     chartRef.current.update();
+    
     // You can perform additional actions based on the selectedDate here
   }
 
@@ -236,8 +243,26 @@ const Ganttchart = () => {
       status: parseInt(statusTask.value)
     });
     chartRef.current.update();
+    addNames();
   }
   
+  function addNames(){
+    const names = document.getElementById('names');
+    while (names.firstElementChild){
+      names.removeChild(names.firstElementChild)
+    }
+    const namesArray = chartRef.current.data.datasets[0].data.map((datapoint) => {
+      return datapoint.name;
+      
+    })
+    const namesArrayFilter = [...new Set(namesArray)]
+    namesArrayFilter.forEach((memberName) => {
+      const option = document.createElement('option');
+      option.value = memberName;
+      names.appendChild(option);
+    })
+    
+  }
 
 
   return (
@@ -255,7 +280,10 @@ const Ganttchart = () => {
           <input type="text" id='taskName' />
           <input type="date" id='startDateTask' />
           <input type="date" id='endDateTask' />
-          <input type="text" id='teamMember' />
+          <input type="text" id='teamMember' list='names' />
+          <datalist id='names'>
+            <option value='James Text'></option>
+          </datalist>
           <select id="statusTask">
             <option value="0">Delayed</option>
             <option value="1">Pending</option>
